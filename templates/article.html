@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}{{ article.get('title','Без названия') }} - News Portal{% endblock %}
+{% block content %}
+  <article class="article">
+    <h2>{{ article.get('title','Без названия') }}</h2>
+    
+    <div class="meta">
+      {% if article.get('topic') %}
+      <a href="{{ url_for('by_topic', topic=article['topic']) }}" class="tag">
+        {{ article['topic'] }}
+      </a>
+      {% endif %}
+      {% if article.get('date') %}
+      <span class="date">📅 {{ article['date'] }}</span>
+      {% endif %}
+      {% if article.get('text') %}
+      <span class="reading-time">⏱️ {{ ((article['text']|length / 200)|round(1))|int }} мин чтения</span>
+      {% endif %}
+      {% if article.get('url') %}
+      <a href="{{ article['url'] }}" target="_blank" rel="noopener noreferrer" class="tag" style="text-decoration: none;">
+        🔗 Источник
+      </a>
+      {% endif %}
+    </div>
+    
+    <img class="hero" 
+         src='{{ url_for("static", filename="img/" + (article.get("topic_key","default")) + ".png") }}' 
+         alt='{{ article.get("topic", "News") }}'
+         loading="lazy"
+         data-fallback='{{ url_for("static", filename="img/default.png") }}'>
+    
+    <div class="text">
+      {{ article.get('text','')|replace('\n', '<br>')|safe }}
+    </div>
+
+    <button class="share-btn" onclick="shareArticle()">
+      <span>📤</span>
+      <span>Поделиться</span>
+    </button>
+  </article>
+
+  {% if recs %}
+  <section style="margin-top: 64px;">
+    <h3>🔗 Похожие материалы</h3>
+    <div class="grid">
+      {% for r in recs %}
+      <article class="card small" data-article-id="{{ r['id'] }}" style="cursor: pointer;">
+        <a href="{{ url_for('article', article_id=r['id']) }}" onclick="event.stopPropagation();">
+          <img src='{{ url_for("static", filename="img/" + (r["topic_key"]|default("default")) + ".png") }}'
+               alt='{{ r.get("topic", "News") }}'
+               loading="lazy"
+               data-fallback='{{ url_for("static", filename="img/default.png") }}'>
+        </a>
+        <div class="meta">
+          {% if r.get('topic') %}
+          <span class="tag" data-topic="{{ r['topic'] }}" style="cursor: pointer;">
+            {{ r['topic'] }}
+          </span>
+          {% endif %}
+          {% if r.get('date') %}
+          <span class="date">📅 {{ r['date'] }}</span>
+          {% endif %}
+          {% if r.get('score') %}
+          <span class="score">✨ {{ '%.0f'|format(r['score'] * 100) }}%</span>
+          {% endif %}
+        </div>
+        <h4>
+          <a href="{{ url_for('article', article_id=r['id']) }}" onclick="event.stopPropagation();">
+            {{ r['title'] }}{% if r['title']|length > 100 %}...{% endif %}
+          </a>
+        </h4>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <script>
+    function shareArticle() {
+      const title = "{{ article.get('title','')|replace("'", "\\'") }}";
+      const url = window.location.href;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: title,
+          url: url
+        }).catch(err => console.log('Error sharing', err));
+      } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(url).then(() => {
+          alert('Ссылка скопирована в буфер обмена!');
+        }).catch(err => {
+          // Fallback: show URL
+          prompt('Скопируйте ссылку:', url);
+        });
+      }
+    }
+  </script>
+{% endblock %}

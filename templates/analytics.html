@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Аналитика - News Portal{% endblock %}
+{% block content %}
+  <h2>📊 Аналитика новостей</h2>
+
+  {% if charts.get('topics') and charts['topics']|length > 0 %}
+  <section style="margin-bottom: 48px;">
+    <h3>📈 Распределение по темам (топ-10)</h3>
+    <ul class="bars">
+      {% set total = charts['topics'].values()|sum %}
+      {% set denom = total if total > 0 else 1 %}
+      {% set max_val = charts['topics'].values()|max %}
+      {% for k, v in charts['topics'].items() %}
+      <li>
+        <span class="label">{{ k }}</span>
+        <span class="bar" style="width: {{ ((v / max_val) * 100)|round(1) }}%; min-width: 20px;" 
+              title="{{ v }} статей ({{ ((v / denom) * 100)|round(1) }}%)">
+        </span>
+        <span class="val">{{ v }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    <p style="color: var(--text-muted); font-size: 14px; margin-top: 16px;">
+      Всего статей: <strong>{{ total }}</strong>
+    </p>
+  </section>
+  {% else %}
+  <section style="margin-bottom: 48px;">
+    <h3>📈 Распределение по темам</h3>
+    <div class="empty-state">
+      <p style="color: var(--text-muted);">Данных по темам пока нет.</p>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if charts.get('timeline') and charts['timeline']|length > 0 %}
+  <section style="margin-bottom: 48px;">
+    <h3>📅 Динамика публикаций по месяцам</h3>
+    <div style="overflow-x: auto;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Месяц</th>
+            <th>Количество статей</th>
+            <th>Визуализация</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set max_timeline = charts['timeline'].values()|max %}
+          {% for k, v in charts['timeline'].items()|sort %}
+          <tr>
+            <td><strong>{{ k }}</strong></td>
+            <td>{{ v }}</td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="flex: 1; height: 20px; background: var(--bg-secondary); border-radius: 10px; overflow: hidden;">
+                  <div style="height: 100%; width: {{ ((v / max_timeline) * 100)|round(1) }}%; background: var(--gradient-3); border-radius: 10px; transition: var(--transition);"></div>
+                </div>
+                <span style="color: var(--text-muted); font-size: 12px; min-width: 50px; text-align: right;">
+                  {{ ((v / max_timeline) * 100)|round(0) }}%
+                </span>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if charts.get('top_tags') and charts['top_tags']|length > 0 %}
+  <section style="margin-bottom: 48px;">
+    <h3>🏷️ Популярные теги</h3>
+    <div class="tags-cloud">
+      {% set max_tag = charts['top_tags'].values()|max %}
+      {% for k, v in charts['top_tags'].items() %}
+      <span class="tag" 
+            style="font-size: {{ (12 + (v / max_tag) * 12)|round(0) }}px;"
+            title="{{ v }} упоминаний">
+        #{{ k }}
+      </span>
+      {% endfor %}
+    </div>
+    <p style="color: var(--text-muted); font-size: 14px; margin-top: 16px;">
+      Всего уникальных тегов: <strong>{{ charts['top_tags']|length }}</strong>
+    </p>
+  </section>
+  {% endif %}
+
+  <section style="margin-top: 48px; padding: 24px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color);">
+    <h3 style="margin-top: 0;">ℹ️ О данных</h3>
+    <p style="color: var(--text-secondary); line-height: 1.8;">
+      Аналитика основана на данных из базы новостей. Графики обновляются автоматически при добавлении новых статей.
+      Используйте фильтры на главной странице для более детального анализа по темам.
+    </p>
+  </section>
+{% endblock %}

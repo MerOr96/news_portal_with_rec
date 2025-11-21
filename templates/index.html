@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}{% if current_topic %}{{ current_topic }} - {% elif query %}Поиск: {{ query }} - {% endif %}News Portal{% endblock %}
+{% block content %}
+  <div style="margin-bottom: 24px;">
+    {% if current_topic %}
+      <h2>📂 Тема: {{ current_topic }}</h2>
+    {% elif query %}
+      <h2>🔍 Результаты поиска: "{{ query }}"</h2>
+      <p style="color: var(--text-secondary); margin-top: 8px;">Найдено статей: {{ pagination.total if pagination else articles|length }}</p>
+    {% else %}
+      <h2>📰 Последние новости</h2>
+    {% endif %}
+  </div>
+
+  {% if not query and not current_topic %}
+  <div class="filters">
+    <label style="color: var(--text-secondary); font-size: 14px; font-weight: 500;">Сортировка:</label>
+    <select id="sortSelect" onchange="applySort()">
+      <option value="date_desc" {% if current_sort == 'date_desc' %}selected{% endif %}>По дате (новые)</option>
+      <option value="date_asc" {% if current_sort == 'date_asc' %}selected{% endif %}>По дате (старые)</option>
+      <option value="title_asc" {% if current_sort == 'title_asc' %}selected{% endif %}>По названию (А-Я)</option>
+      <option value="title_desc" {% if current_sort == 'title_desc' %}selected{% endif %}>По названию (Я-А)</option>
+    </select>
+    
+    <label style="color: var(--text-secondary); font-size: 14px; font-weight: 500; margin-left: 16px;">Темы:</label>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1;">
+      <a href="{{ url_for('index') }}" class="chip" style="margin: 0;">Все</a>
+      {% for topic in topics %}
+      <a href="{{ url_for('by_topic', topic=topic) }}" class="chip" style="margin: 0;">{{ topic }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if articles|length > 0 %}
+  <div class="grid">
+    {% for a in articles %}
+    <article class="card" data-article-id="{{ a['id'] }}" style="cursor: pointer;">
+      <img src='{{ url_for("static", filename="img/" + (a["topic_key"]|default("default")) + ".png") }}' 
+           alt='{{ a.get("topic", "News") }}' 
+           loading="lazy"
+           data-fallback='{{ url_for("static", filename="img/default.png") }}'>
+
+      <div class="meta">
+        {% if a.get('topic') %}
+        <span class="tag" data-topic="{{ a['topic'] }}" style="cursor: pointer;">
+          {{ a['topic'] }}
+        </span>
+        {% endif %}
+        {% if a.get('date') %}
+        <span class="date">📅 {{ a['date'] }}</span>
+        {% endif %}
+        {% if a.get('text') %}
+        <span class="reading-time">⏱️ {{ ((a['text']|length / 200)|round(1))|int }} мин</span>
+        {% endif %}
+      </div>
+      
+      <h3>
+        <a href="{{ url_for('article', article_id=a['id']) }}" onclick="event.stopPropagation();">
+          {{ a['title'][:140] }}{% if a['title']|length > 140 %}...{% endif %}
+        </a>
+      </h3>
+      
+      <p>{{ a['text'][:220] }}{% if a['text'] and a['text']|length > 220 %}…{% endif %}</p>
+      
+      {% if a.get('topic') %}
+      <a class="chip" href="{{ url_for('by_topic', topic=a['topic']) }}" onclick="event.stopPropagation();">
+        #{{ a['topic'] }}
+      </a>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+
+  {% if pagination and pagination.pages > 1 %}
+  <div class="pagination">
+    {% if pagination.has_prev %}
+    <a href="?page={{ pagination.prev_num }}{% if query %}&q={{ query }}{% endif %}">‹ Предыдущая</a>
+    {% endif %}
+    
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if page_num %}
+        {% if page_num == pagination.page %}
+        <span class="active">{{ page_num }}</span>
+        {% else %}
+        <a href="?page={{ page_num }}{% if query %}&q={{ query }}{% endif %}">{{ page_num }}</a>
+        {% endif %}
+      {% else %}
+        <span>...</span>
+      {% endif %}
+    {% endfor %}
+    
+    {% if pagination.has_next %}
+    <a href="?page={{ pagination.next_num }}{% if query %}&q={{ query }}{% endif %}">Следующая ›</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="empty-state">
+    <h3>😔 Статьи не найдены</h3>
+    <p>Попробуйте изменить параметры поиска или фильтры</p>
+    <a href="{{ url_for('index') }}" class="chip" style="margin-top: 16px; display: inline-block;">Вернуться на главную</a>
+  </div>
+  {% endif %}
+{% endblock %}

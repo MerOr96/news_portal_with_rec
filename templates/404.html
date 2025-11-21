@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}404 - Страница не найдена - News Portal{% endblock %}
+{% block content %}
+  <div class="empty-state" style="padding: 128px 24px;">
+    <h2 style="font-size: 6rem; margin: 0; color: var(--accent);">404</h2>
+    <h3 style="margin: 24px 0 16px 0;">Страница не найдена</h3>
+    <p style="color: var(--text-secondary); margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto;">
+      К сожалению, запрашиваемая страница не существует. Возможно, статья была удалена или ссылка неверна.
+    </p>
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <a href="{{ url_for('index') }}" class="chip" style="padding: 12px 24px; font-size: 16px; text-decoration: none;">
+        🏠 Вернуться на главную
+      </a>
+      <a href="{{ url_for('analytics') }}" class="chip" style="padding: 12px 24px; font-size: 16px; text-decoration: none;">
+        📊 Перейти к аналитике
+      </a>
+    </div>
+  </div>
+{% endblock %}
+

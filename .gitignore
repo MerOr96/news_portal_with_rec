@@ -1,0 +1,22 @@
+# данные и большие артефакты
+data/
+datasets/
+*.csv
+*.xlsx
+*.parquet
+*.zip
+*.gz
+
+# ноутбуки и кеши
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# виртуальные среды/кеши
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# конфиги с секретами
+.env
+*.env

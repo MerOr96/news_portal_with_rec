@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Современный портал новостей с умными рекомендациями и аналитикой">
+  <title>{% block title %}News Portal - Современный портал новостей{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1><a href="{{ url_for('index') }}">📰 News Portal</a></h1>
+      <nav>
+        <a href="{{ url_for('index') }}">🏠 Главная</a>
+        <a href="{{ url_for('analytics') }}">📊 Аналитика</a>
+      </nav>
+      <form class="search" action="{{ url_for('search') }}" method="get">
+        <input type="text" name="q" placeholder="🔍 Поиск по новостям..." value="{{ query or '' }}" autocomplete="off">
+        <button type="submit">Найти</button>
+      </form>
+    </div>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2025 News Portal — Современный портал новостей с умными рекомендациями</p>
+    </div>
+  </footer>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
